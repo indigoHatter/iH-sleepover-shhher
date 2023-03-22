@@ -1,0 +1,53 @@
+Final Project Write-up
+---------------------------------------
+ELT162 - Microprocessors & Microcontrol
+2023 Spring semester; online class
+Robert "Porter" Blakeley
+---------------------------------------
+
+I like to call my project the "Sleepover Shhhh-er". I was inspired by a sleepover one of my kids had where I kept having to peek out my door and remind them that people are sleeping!... keep it down! With this contraption, they can police their own volume by ensuring they're never too loud, and can "calibrate" their personal volume level to an acceptable amount against this device!
+
+This sketch takes analog input from a sound sensor and compares it to a user-defined range on the Arduino, outputs the relative value on a scale of 1-8 through a shift register to LEDs (colored blue/green/yellow/red for on/normal/caution/danger), and when the upper limit is met or exceeded, a small buzzer goes off! The range and baseline volume are editable by the user with the IR remote.
+
+------------------------------------------------------------------------------------------------------
+Below is a bunch of notes discussing things I've learned and items on the design wishlist, for next time I'm feeling tinker-y and want to perfect this design!
+------------------------------------------------------------------------------------------------------
+
+
+
+Interesting lessons learned:
+----------------------------
+ * Both the built-in <Tone()> and the incorporated <IRreceiver.h> libraries use the same timer, Timer2! I had to edit the IRreceiverInt.h library to use Timer1, so that the code would compile properly without two libraries competing for the same timer.
+ * The IDE's serial plotter only works if your serial output is formatted a certain, simple way! (Can't use certain symbols like : for making your serial monitor output pretty! The plotter can't handle it!)
+ * Something that looks easy will take twice as long as I'd expect it to!
+ * Never trust your breadboard. If your wiring and code look acceptable... move everything to a different row and try again! Guess how many hours I used up to learn this lesson..... (:
+ * An easy way to handle differing brightness levels with different colored LEDs is simply to increase or decrease the resistance per color.
+    * Blue & Green are using 1K ohm resistors, Red is using 220 ohm, and Yellow is using 100 ohm so that it has a fighting chance compared to the other colors!
+
+
+Areas for design improvement:
+-----------------------------
+ * Find a beefier buzzer, or a speaker! Currently, anything loud enough to set the alarm off (in most cases) will be louder than the buzzer itself, meaning people won't hear it in real situations!
+ * Add my doRemote() function to within the playSong() function, so that commands aren't ignored for ~10 seconds.
+ * Add multiple melodies, and allow the user to either select one preferred one, or to choose randomly.
+ * Add more IR buttons, such as:
+    * Reset to default settings
+	* Play sound immediately
+	* Pause listening (perhaps on a self-set timer, such as 5 minutes)
+	* Power On/Off (Off = disable listening and LEDs, but still allow Arduino to wait for a signal to start back up)
+ * Troubleshoot some infinite loops that happen after a loud sound event...
+    * Sound sensor seems to lower the "median" volume after a loud event, so sound levels that previously were within range are now reporting as below range, putting alarm in a pretty constant loop.
+	   * Some fixes may include adding a time-delay... some level of soft-hysteresis.
+	      * If(sound >= alarmSetting AND timeEvent==0) { record nowTime into timeEvent, then if (nowTime-timeEvent==3ms), { playSong(); timeEvent=0 to clear timeEvent;}, then do this again with a different time event to allow for a 5-120 second delay between alarms while still measuring sound (instead of freezing entire operation with a delay(5000) command.
+		  * Could also use another timeStamp and some holding variables to temporarily widen the acceptable range for 60 seconds, then scale it back to what it was before over the next 60 seconds.
+		        * Both of the above troubleshooting ideas could lend themselves to the implementation of my previously mentioned "Pause" function, and then this function could just call that function with 5 seconds as a passable input!
+		  * May program in ways to handle when the sound is "lower" than limit, which seems to be a common reason for continuous loops after an alarm event. This may be worth handling in regular operation too, rather than only in alarm conditions.
+ * Handle Serial Monitor output more gracefully, to allow more interesting interfacing with this device among other devices.
+ * Add a visual screen that outputs real numbers, similar to what the serial monitor outputs, in conjunction with the already-implemented LEDs.
+
+
+Despite all of these "areas to improve", I feel satisfied that this project can attain the intended results in a repeatable manner. Given the time I've already committed to this project, I think it's fair to let these "wishlist" items slide into future-me's problem. :) It's good enough to use and take notes for later improvement. Projects are never truly "done" anyway, right? :)
+
+
+Cheers! (You actually took the time to read this? Right on. Thank you!)
+I hope my project and this write-up entertained you.
